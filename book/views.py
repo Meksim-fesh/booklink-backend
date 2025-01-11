@@ -11,3 +11,12 @@ class GenreViewSet(
 ):
     queryset = models.Genre.objects.all()
     serializer_class = serializers.GenreSerializer
+
+
+class AuthorViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet,
+):
+    queryset = models.Author.objects.all()
+    serializer_class = serializers.AuthorSerializer
