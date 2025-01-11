@@ -7,6 +7,7 @@ from book import views
 router = DefaultRouter()
 
 router.register("genres", views.GenreViewSet)
+router.register("authors", views.AuthorViewSet)
 
 
 urlpatterns = [
