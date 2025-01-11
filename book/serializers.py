@@ -29,3 +29,10 @@ class BookSerializer(serializers.ModelSerializer):
             "pages",
             "summary",
         ]
+
+
+class ChapterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Chapter
+        fields = ["id", "name", "book"]
