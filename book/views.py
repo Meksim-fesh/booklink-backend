@@ -25,3 +25,12 @@ class AuthorViewSet(
 class BookViewSet(ModelViewSet):
     queryset = models.Book.objects.all()
     serializer_class = serializers.BookSerializer
+
+
+class ChapterViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet,
+):
+    queryset = models.Chapter.objects.all()
+    serializer_class = serializers.ChapterSerializer
