@@ -15,3 +15,17 @@ class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Author
         fields = ["id", "first_name", "last_name"]
+
+
+class BookSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Book
+        fields = [
+            "id",
+            "name",
+            "genres",
+            "authors",
+            "pages",
+            "summary",
+        ]
