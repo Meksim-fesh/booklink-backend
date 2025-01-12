@@ -5,8 +5,20 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
+from user import views
+
 
 urlpatterns = [
+    path(
+        "register/",
+        views.CreateUserView.as_view(),
+        name="user-create"
+    ),
+    path(
+        "me/",
+        views.ManageUserView.as_view(),
+        name="user-manage"
+    ),
     path(
         "token/",
         TokenObtainPairView.as_view(),
