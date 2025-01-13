@@ -17,11 +17,25 @@ class AuthorSerializer(serializers.ModelSerializer):
         fields = ["id", "first_name", "last_name"]
 
 
+class AuthorListSerializer(AuthorSerializer):
+
+    class Meta:
+        model = models.Author
+        fields = ["first_name", "last_name"]
+
+
 class ChapterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Chapter
         fields = ["id", "name", "book"]
+
+
+class ChapterListSerializer(ChapterSerializer):
+
+    class Meta:
+        model = models.Chapter
+        fields = ["name",]
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -44,14 +58,14 @@ class BookListSerializer(BookSerializer):
         read_only=True,
         slug_field="name",
     )
-    authors = AuthorSerializer(
+    authors = AuthorListSerializer(
         many=True,
         read_only=True,
     )
 
 
 class BookDetailSerializer(BookListSerializer):
-    chapters = ChapterSerializer(
+    chapters = ChapterListSerializer(
         many=True,
         read_only=True,
     )
