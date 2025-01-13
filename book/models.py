@@ -29,7 +29,12 @@ class Book(models.Model):
 
 class Chapter(models.Model):
     name = models.CharField(max_length=128)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="chapters"
+    )
+    serial_number = models.PositiveIntegerField()
 
     def __str__(self):
         return "Chapter: " + self.name
