@@ -23,8 +23,22 @@ class AuthorViewSet(
 
 
 class BookViewSet(ModelViewSet):
-    queryset = models.Book.objects.all()
-    serializer_class = serializers.BookSerializer
+    queryset = models.Book.objects.prefetch_related("genres", "authors")
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        if self.action == "retrieve":
+            return queryset.prefetch_related("chapters")
+
+        return queryset
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return serializers.BookListSerializer
+        if self.action == "retrieve":
+            return serializers.BookDetailSerializer
+        return serializers.BookSerializer
 
 
 class ChapterViewSet(
