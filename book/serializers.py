@@ -28,14 +28,14 @@ class ChapterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Chapter
-        fields = ["id", "name", "book"]
+        fields = ["id", "name", "book", "serial_number"]
 
 
 class ChapterListSerializer(ChapterSerializer):
 
     class Meta:
         model = models.Chapter
-        fields = ["name",]
+        fields = ["name", "serial_number"]
 
 
 class BookSerializer(serializers.ModelSerializer):
