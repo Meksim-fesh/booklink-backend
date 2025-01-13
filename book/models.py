@@ -34,6 +34,7 @@ class Chapter(models.Model):
         on_delete=models.CASCADE,
         related_name="chapters"
     )
+    serial_number = models.PositiveIntegerField()
 
     def __str__(self):
         return "Chapter: " + self.name
