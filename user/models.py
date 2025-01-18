@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
+from book.models import Book
+
 
 class UserManager(BaseUserManager):
 
@@ -34,6 +36,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+    library = models.ManyToManyField(Book, related_name="users")
+
     username = None
     email = models.EmailField("email address", unique=True)
 
