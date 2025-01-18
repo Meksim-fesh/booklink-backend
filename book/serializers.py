@@ -39,10 +39,42 @@ class ChapterListSerializer(ChapterSerializer):
 
 
 class ChapterDetailSerializer(ChapterSerializer):
+    related_chapters = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Chapter
-        fields = ["id", "name", "serial_number"]
+        fields = ["id", "name", "serial_number", "related_chapters"]
+
+    def get_related_chapters(
+            self,
+            chapter: models.Chapter
+    ) -> dict[str, int | None]:
+        current_serial_number = chapter.serial_number
+        book_id = chapter.book
+
+        previous_chapter_id = self._get_chapter(
+            book_id=book_id,
+            serial_number=current_serial_number - 1
+        )
+        next_chapter_id = self._get_chapter(
+            book_id=book_id,
+            serial_number=current_serial_number + 1
+        )
+
+        return {
+            "previous_chapter_id": previous_chapter_id,
+            "next_chapter_id": next_chapter_id,
+        }
+
+    def _get_chapter(self, book_id: int, serial_number: int) -> int | None:
+        chapter = models.Chapter.objects.filter(
+            book=book_id,
+            serial_number=serial_number
+        ).first()
+
+        if chapter:
+            return chapter.id
+        return None
 
 
 class BookSerializer(serializers.ModelSerializer):
