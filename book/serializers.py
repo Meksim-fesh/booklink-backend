@@ -35,7 +35,14 @@ class ChapterListSerializer(ChapterSerializer):
 
     class Meta:
         model = models.Chapter
-        fields = ["name", "serial_number"]
+        fields = ["id", "name", "serial_number"]
+
+
+class ChapterDetailSerializer(ChapterSerializer):
+
+    class Meta:
+        model = models.Chapter
+        fields = ["id", "name", "serial_number"]
 
 
 class BookSerializer(serializers.ModelSerializer):
