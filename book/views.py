@@ -42,9 +42,8 @@ class BookViewSet(ModelViewSet):
 
 
 class ChapterViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
     GenericViewSet,
 ):
-    queryset = models.Chapter.objects.all()
-    serializer_class = serializers.ChapterSerializer
+    queryset = models.Chapter.objects.select_related("book")
+    serializer_class = serializers.ChapterDetailSerializer
