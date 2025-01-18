@@ -34,6 +34,11 @@ urlpatterns = [
         TokenVerifyView.as_view(),
         name="token_verify"
     ),
+    path(
+        "library/",
+        views.MyLibraryView.as_view(),
+        name="library"
+    ),
 ]
 
 
