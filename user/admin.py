@@ -21,7 +21,8 @@ class UserAdmin(DjangoUserAdmin):
                 )
             }
         ),
-        ("Imporrtant dates", {"fields": ("last_login", "date_joined")})
+        ("Imporrtant dates", {"fields": ("last_login", "date_joined")}),
+        ("Related books", {"fields": ("library", )}),
     )
     add_fieldsets = (
         (
