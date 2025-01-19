@@ -1,4 +1,4 @@
-from rest_framework import mixins
+from rest_framework import mixins, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -64,6 +64,19 @@ class BookViewSet(ModelViewSet):
 
         user.library.add(book)
         return Response({"status": "Book was added"})
+
+
+class UserLibraryView(generics.ListAPIView):
+    serializer_class = serializers.BookListSerializer
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JWTAuthentication, )
+
+    def get_queryset(self):
+        queryset = models.Book.objects.filter(
+            users=self.request.user.id
+        ).prefetch_related("genres", "authors")
+
+        return queryset
 
 
 class ChapterViewSet(
