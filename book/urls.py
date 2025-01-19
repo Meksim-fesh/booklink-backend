@@ -14,6 +14,7 @@ router.register("chapters", views.ChapterViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("library/", views.UserLibraryView.as_view(), name="user-library"),
 ]
 
 app_name = "book"
