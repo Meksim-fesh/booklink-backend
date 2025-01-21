@@ -1,4 +1,12 @@
 from django.db import models
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
+
+def get_sentinel_user():
+    return get_user_model().objects.get_or_create(
+        first_name="User", last_name="Deleted", email=None
+    )[0]
 
 
 class Genre(models.Model):
@@ -38,3 +46,41 @@ class Chapter(models.Model):
 
     def __str__(self):
         return "Chapter: " + self.name
+
+
+class Commentary(models.Model):
+    book = models.ForeignKey(
+        Book,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="commentaries"
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET(get_sentinel_user),
+        related_name="commentaries"
+    )
+    content = models.TextField()
+    date = models.DateField(auto_now_add=True)
+    parent = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="replies"
+    )
+
+    class Meta:
+        ordering = ["-date"]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(book__isnull=False)
+                | models.Q(parent__isnull=False),
+                name="has_parent_or_book_to_refer_to",
+            )
+        ]
+        verbose_name_plural = "commentaries"
+
+    def __str__(self):
+        return str(self.author) + " comment " + self.content
