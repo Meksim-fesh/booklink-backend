@@ -2,7 +2,7 @@ from rest_framework import mixins, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from django.http import HttpResponseRedirect
@@ -13,7 +13,6 @@ from book import models, serializers
 
 class GenreViewSet(
     mixins.ListModelMixin,
-    mixins.CreateModelMixin,
     GenericViewSet,
 ):
     queryset = models.Genre.objects.all()
@@ -22,14 +21,17 @@ class GenreViewSet(
 
 class AuthorViewSet(
     mixins.ListModelMixin,
-    mixins.CreateModelMixin,
     GenericViewSet,
 ):
     queryset = models.Author.objects.all()
     serializer_class = serializers.AuthorSerializer
 
 
-class BookViewSet(ModelViewSet):
+class BookViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet
+):
     queryset = models.Book.objects.prefetch_related("genres", "authors")
     permission_classes = (IsAuthenticated, )
     authentication_classes = (JWTAuthentication, )
@@ -38,7 +40,11 @@ class BookViewSet(ModelViewSet):
         queryset = self.queryset
 
         if self.action == "retrieve":
-            return queryset.prefetch_related("chapters")
+            return queryset.prefetch_related(
+                "chapters",
+                "commentaries__replies__author",
+                "commentaries__author"
+            )
 
         return queryset
 
