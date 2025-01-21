@@ -77,6 +77,24 @@ class ChapterDetailSerializer(ChapterSerializer):
         return None
 
 
+class CommentarySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Commentary
+        fields = ["id", "book", "author", "content", "date", "parent"]
+
+
+class CommentaryBookDetailSerializer(CommentarySerializer):
+    replies = CommentarySerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = models.Commentary
+        fields = ["id", "author", "content", "date", "parent", "replies"]
+
+
 class BookSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -108,6 +126,10 @@ class BookDetailSerializer(BookListSerializer):
         many=True,
         read_only=True,
     )
+    commentaries = CommentaryBookDetailSerializer(
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = models.Book
@@ -119,4 +141,5 @@ class BookDetailSerializer(BookListSerializer):
             "pages",
             "summary",
             "chapters",
+            "commentaries",
         ]
