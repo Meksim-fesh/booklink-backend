@@ -15,6 +15,16 @@ router.register("chapters", views.ChapterViewSet)
 urlpatterns = [
     path("", include(router.urls)),
     path("library/", views.UserLibraryView.as_view(), name="user-library"),
+    path(
+        "books/<int:pk>/add-comment/",
+        views.CommentaryCreateView.as_view(),
+        name="add-comment"
+    ),
+    path(
+        "commentaries/<int:pk>/add-reply/",
+        views.ReplyCreateView.as_view(),
+        name="add-reply",
+    ),
 ]
 
 app_name = "book"

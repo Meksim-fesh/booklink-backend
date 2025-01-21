@@ -2,15 +2,17 @@ from rest_framework import mixins, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
+
+from django.http import HttpResponseRedirect
+from django.urls import reverse_lazy
 
 from book import models, serializers
 
 
 class GenreViewSet(
     mixins.ListModelMixin,
-    mixins.CreateModelMixin,
     GenericViewSet,
 ):
     queryset = models.Genre.objects.all()
@@ -19,14 +21,17 @@ class GenreViewSet(
 
 class AuthorViewSet(
     mixins.ListModelMixin,
-    mixins.CreateModelMixin,
     GenericViewSet,
 ):
     queryset = models.Author.objects.all()
     serializer_class = serializers.AuthorSerializer
 
 
-class BookViewSet(ModelViewSet):
+class BookViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet
+):
     queryset = models.Book.objects.prefetch_related("genres", "authors")
     permission_classes = (IsAuthenticated, )
     authentication_classes = (JWTAuthentication, )
@@ -35,7 +40,11 @@ class BookViewSet(ModelViewSet):
         queryset = self.queryset
 
         if self.action == "retrieve":
-            return queryset.prefetch_related("chapters")
+            return queryset.prefetch_related(
+                "chapters",
+                "commentaries__replies__author",
+                "commentaries__author"
+            )
 
         return queryset
 
@@ -85,3 +94,58 @@ class ChapterViewSet(
 ):
     queryset = models.Chapter.objects.select_related("book")
     serializer_class = serializers.ChapterDetailSerializer
+
+
+class CommentaryCreateView(generics.GenericAPIView):
+    serializer_class = serializers.CommentaryCreateSerializer
+    queryset = models.Book.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        book = self.get_object()
+        user = self.request.user
+
+        serializer = self.serializer_class(
+            data=request.data,
+            context={
+                "request": request,
+                "author": user,
+                "book": book,
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return HttpResponseRedirect(
+            reverse_lazy("book:book-detail", args=[book.id])
+        )
+
+
+class ReplyCreateView(generics.GenericAPIView):
+    serializer_class = serializers.ReplyCreateSerializer
+    queryset = models.Commentary.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        parent = self.get_object()
+        user = self.request.user
+
+        serializer = self.serializer_class(
+            data=request.data,
+            context={
+                "request": request,
+                "author": user,
+                "parent": parent,
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        if parent.parent:
+            book_id = parent.parent.book.id
+        else:
+            book_id = parent.book.id
+
+        return HttpResponseRedirect(
+            reverse_lazy("book:book-detail", args=[book_id])
+        )

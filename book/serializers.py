@@ -77,6 +77,80 @@ class ChapterDetailSerializer(ChapterSerializer):
         return None
 
 
+class CommentarySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Commentary
+        fields = ["id", "book", "author", "content", "date", "parent"]
+
+    def validate(self, attrs):
+        if not (len(attrs) == 1 and attrs.get("content")):
+            raise serializers.ValidationError(
+                "Some unnecessary data were provided"
+            )
+        return super().validate(attrs)
+
+
+class CommentaryCreateSerializer(CommentarySerializer):
+
+    class Meta:
+        model = models.Commentary
+        fields = ["content", ]
+
+    def create(self, validated_data):
+        print(validated_data)
+        validated_data["book"] = self.context["book"]
+        validated_data["author"] = self.context["author"]
+        print(validated_data)
+
+        return super().create(validated_data)
+
+
+class ReplyCreateSerializer(CommentarySerializer):
+
+    class Meta:
+        model = models.Commentary
+        fields = ["content", ]
+
+    def create(self, validated_data):
+        parent = self.context["parent"]
+
+        replying_to = str(parent.author)
+        validated_data["content"] = (
+            replying_to + ", " + validated_data["content"]
+        )
+
+        if parent.parent:
+            print("in if statement")
+            parent = parent.parent
+
+        validated_data["parent"] = parent
+        validated_data["author"] = self.context["author"]
+        return super().create(validated_data)
+
+
+class CommentDetailSerializer(CommentarySerializer):
+    author = AuthorListSerializer(read_only=True)
+
+
+class ReplyBookDetailSerializer(CommentDetailSerializer):
+
+    class Meta:
+        model = models.Commentary
+        fields = ["id", "author", "content", "date"]
+
+
+class CommentaryBookDetailSerializer(CommentDetailSerializer):
+    replies = ReplyBookDetailSerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = models.Commentary
+        fields = ["id", "author", "content", "date", "replies"]
+
+
 class BookSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -108,6 +182,10 @@ class BookDetailSerializer(BookListSerializer):
         many=True,
         read_only=True,
     )
+    commentaries = CommentaryBookDetailSerializer(
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = models.Book
@@ -119,4 +197,5 @@ class BookDetailSerializer(BookListSerializer):
             "pages",
             "summary",
             "chapters",
+            "commentaries",
         ]
