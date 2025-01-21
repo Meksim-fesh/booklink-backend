@@ -129,15 +129,26 @@ class ReplyCreateSerializer(CommentarySerializer):
         return super().create(validated_data)
 
 
-class CommentaryBookDetailSerializer(CommentarySerializer):
-    replies = CommentarySerializer(
+class CommentDetailSerializer(CommentarySerializer):
+    author = AuthorListSerializer(read_only=True)
+
+
+class ReplyBookDetailSerializer(CommentDetailSerializer):
+
+    class Meta:
+        model = models.Commentary
+        fields = ["id", "author", "content", "date"]
+
+
+class CommentaryBookDetailSerializer(CommentDetailSerializer):
+    replies = ReplyBookDetailSerializer(
         many=True,
         read_only=True
     )
 
     class Meta:
         model = models.Commentary
-        fields = ["id", "author", "content", "date", "parent", "replies"]
+        fields = ["id", "author", "content", "date", "replies"]
 
 
 class BookSerializer(serializers.ModelSerializer):
