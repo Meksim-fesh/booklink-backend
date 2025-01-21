@@ -113,3 +113,33 @@ class CommentaryCreateView(generics.GenericAPIView):
         return HttpResponseRedirect(
             reverse_lazy("book:book-detail", args=[book.id])
         )
+
+
+class ReplyCreateView(generics.GenericAPIView):
+    serializer_class = serializers.ReplyCreateSerializer
+    queryset = models.Commentary.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        parent = self.get_object()
+        user = self.request.user
+
+        serializer = self.serializer_class(
+            data=request.data,
+            context={
+                "request": request,
+                "author": user,
+                "parent": parent,
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        if parent.parent:
+            book_id = parent.parent.book.id
+        else:
+            book_id = parent.book.id
+
+        return HttpResponseRedirect(
+            reverse_lazy("book:book-detail", args=[book_id])
+        )
