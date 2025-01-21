@@ -5,6 +5,9 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from django.http import HttpResponseRedirect
+from django.urls import reverse_lazy
+
 from book import models, serializers
 
 
@@ -85,3 +88,28 @@ class ChapterViewSet(
 ):
     queryset = models.Chapter.objects.select_related("book")
     serializer_class = serializers.ChapterDetailSerializer
+
+
+class CommentaryCreateView(generics.GenericAPIView):
+    serializer_class = serializers.CommentaryCreateSerializer
+    queryset = models.Book.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        book = self.get_object()
+        user = self.request.user
+
+        serializer = self.serializer_class(
+            data=request.data,
+            context={
+                "request": request,
+                "author": user,
+                "book": book,
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return HttpResponseRedirect(
+            reverse_lazy("book:book-detail", args=[book.id])
+        )
