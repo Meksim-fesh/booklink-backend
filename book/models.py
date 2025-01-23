@@ -84,3 +84,45 @@ class Commentary(models.Model):
 
     def __str__(self):
         return str(self.author) + " comment " + self.content
+
+
+class BookView(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="viewed"
+    )
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="viewed_by"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("book", "user"),
+                name="one_view_for_user_for_book"
+            ),
+        ]
+
+
+class BookLike(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="liked"
+    )
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="liked_by"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("book", "user"),
+                name="one_like_for_user_for_book"
+            ),
+        ]
