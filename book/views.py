@@ -46,6 +46,7 @@ class BookViewSet(
                 "commentaries__author"
             ).annotate(
                 views=Count("viewed_by"),
+                views=Count("liked_by"),
             )
 
         return queryset
@@ -75,6 +76,28 @@ class BookViewSet(
 
         user.library.add(book)
         return Response({"status": "Book was added"})
+
+    @action(
+            methods=["post"],
+            detail=True,
+            url_path="toggle-like",
+            url_name="toggle-like",
+    )
+    def toggle_like(self, request, pk=None):
+        book = self.get_object()
+        user = self.request.user
+
+        like, created = models.BookLike.objects.get_or_create(
+            book=book,
+            user=user
+        )
+
+        if created:
+            return Response({"status": "Like was added"})
+
+        like.delete()
+
+        return Response({"status": "Like was removed"})
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
