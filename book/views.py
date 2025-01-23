@@ -7,6 +7,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.db.models.aggregates import Count
 
 from book import models, serializers
 
@@ -29,7 +30,6 @@ class AuthorViewSet(
 
 class BookViewSet(
     mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
     GenericViewSet
 ):
     queryset = models.Book.objects.prefetch_related("genres", "authors")
@@ -44,6 +44,9 @@ class BookViewSet(
                 "chapters",
                 "commentaries__replies__author",
                 "commentaries__author"
+            ).annotate(
+                views=Count("viewed_by"),
+                views=Count("liked_by"),
             )
 
         return queryset
@@ -73,6 +76,40 @@ class BookViewSet(
 
         user.library.add(book)
         return Response({"status": "Book was added"})
+
+    @action(
+            methods=["post"],
+            detail=True,
+            url_path="toggle-like",
+            url_name="toggle-like",
+    )
+    def toggle_like(self, request, pk=None):
+        book = self.get_object()
+        user = self.request.user
+
+        like, created = models.BookLike.objects.get_or_create(
+            book=book,
+            user=user
+        )
+
+        if created:
+            return Response({"status": "Like was added"})
+
+        like.delete()
+
+        return Response({"status": "Like was removed"})
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = self.request.user
+
+        models.BookView.objects.get_or_create(
+            book=instance,
+            user=user
+        )
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class UserLibraryView(generics.ListAPIView):

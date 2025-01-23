@@ -186,6 +186,8 @@ class BookDetailSerializer(BookListSerializer):
         many=True,
         read_only=True
     )
+    views = serializers.IntegerField()
+    likes = serializers.IntegerField()
 
     class Meta:
         model = models.Book
@@ -198,4 +200,6 @@ class BookDetailSerializer(BookListSerializer):
             "summary",
             "chapters",
             "commentaries",
+            "views",
+            "likes",
         ]
