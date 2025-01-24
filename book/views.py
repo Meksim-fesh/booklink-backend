@@ -45,8 +45,8 @@ class BookViewSet(
                 "commentaries__replies__author",
                 "commentaries__author"
             ).annotate(
-                views=Count("viewed_by"),
-                views=Count("liked_by"),
+                views=Count("viewed_by", distinct=True),
+                likes=Count("liked_by", distinct=True),
             )
 
         return queryset
