@@ -4,6 +4,7 @@ from book.models import (
     Author,
     Book,
     BookLike,
+    BookMonthView,
     BookView,
     Chapter,
     Commentary,
@@ -18,3 +19,4 @@ admin.site.register(Chapter)
 admin.site.register(Commentary)
 admin.site.register(BookView)
 admin.site.register(BookLike)
+admin.site.register(BookMonthView)
