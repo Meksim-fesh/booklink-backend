@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "book",
     "user",
     "debug_toolbar",
+    "django_q",
 ]
 
 MIDDLEWARE = [
@@ -152,4 +153,33 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(weeks=10),
+}
+
+
+Q_CLUSTER = {
+    "name": "booklink",
+    "workers": 8,
+    "recycle": 500,
+    "timeout": 60,
+    "compress": True,
+    "save_limit": 250,
+    "queue_limit": 500,
+    "cpu_affinity": 1,
+    "label": "Django Q2",
+    "redis": {
+        "host": "127.0.0.1",
+        "port": 6379,
+        "db": 0,
+    },
+    "ALT_CLUSTERS": {
+        "long": {
+            "timeout": 3000,
+            "retry": 3600,
+            "max_attempts": 2,
+        },
+        "short": {
+            "timeout": 10,
+            "max_attempts": 1,
+        },
+    },
 }
