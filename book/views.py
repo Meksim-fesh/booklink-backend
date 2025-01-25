@@ -107,6 +107,10 @@ class BookViewSet(
             book=instance,
             user=user
         )
+        models.BookMonthView.objects.get_or_create(
+            book=instance,
+            user=user
+        )
 
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
