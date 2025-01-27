@@ -8,6 +8,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.db.models.aggregates import Count
+from django.db.models import F
 
 from book import models, serializers
 
@@ -57,6 +58,23 @@ class BookViewSet(
         if self.action == "retrieve":
             return serializers.BookDetailSerializer
         return serializers.BookSerializer
+
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path="popular-this-month",
+        url_name="popular-this-month",
+    )
+    def popular_this_month(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     @action(
         methods=["post"],
