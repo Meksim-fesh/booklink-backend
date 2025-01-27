@@ -49,11 +49,15 @@ class BookViewSet(
                 views=Count("viewed_by", distinct=True),
                 likes=Count("liked_by", distinct=True),
             )
+        elif self.action == "popular_this_month":
+            return queryset.annotate(
+                month_views=Count("viewed_by_this_month")
+            ).order_by("-month_views")
 
         return queryset
 
     def get_serializer_class(self):
-        if self.action == "list":
+        if self.action in ("list", "popular_this_month"):
             return serializers.BookListSerializer
         if self.action == "retrieve":
             return serializers.BookDetailSerializer
@@ -65,16 +69,8 @@ class BookViewSet(
         url_path="popular-this-month",
         url_name="popular-this-month",
     )
-    def popular_this_month(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+    def popular_this_month(self, request, *args, **kwargs):
+        return self.list(self, request, *args, **kwargs)
 
     @action(
         methods=["post"],
