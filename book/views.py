@@ -8,7 +8,6 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.db.models.aggregates import Count
-from django.db.models import F
 
 from book import models, serializers
 
