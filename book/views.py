@@ -45,18 +45,31 @@ class BookViewSet(
                 "commentaries__replies__author",
                 "commentaries__author"
             ).annotate(
-                views=Count("viewed_by"),
-                views=Count("liked_by"),
+                views=Count("viewed_by", distinct=True),
+                likes=Count("liked_by", distinct=True),
             )
+        elif self.action == "popular_this_month":
+            return queryset.annotate(
+                month_views=Count("viewed_by_this_month")
+            ).order_by("-month_views")
 
         return queryset
 
     def get_serializer_class(self):
-        if self.action == "list":
+        if self.action in ("list", "popular_this_month"):
             return serializers.BookListSerializer
         if self.action == "retrieve":
             return serializers.BookDetailSerializer
         return serializers.BookSerializer
+
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path="popular-this-month",
+        url_name="popular-this-month",
+    )
+    def popular_this_month(self, request, *args, **kwargs):
+        return self.list(self, request, *args, **kwargs)
 
     @action(
         methods=["post"],
@@ -104,6 +117,10 @@ class BookViewSet(
         user = self.request.user
 
         models.BookView.objects.get_or_create(
+            book=instance,
+            user=user
+        )
+        models.BookMonthView.objects.get_or_create(
             book=instance,
             user=user
         )

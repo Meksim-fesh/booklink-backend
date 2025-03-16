@@ -126,3 +126,24 @@ class BookLike(models.Model):
                 name="one_like_for_user_for_book"
             ),
         ]
+
+
+class BookMonthView(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="viewed_this_month"
+    )
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="viewed_by_this_month"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("book", "user"),
+                name="one_view_for_user_for_book_this_month"
+            ),
+        ]
