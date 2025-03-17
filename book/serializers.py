@@ -43,7 +43,7 @@ class ChapterDetailSerializer(ChapterSerializer):
 
     class Meta:
         model = models.Chapter
-        fields = ["id", "name", "serial_number", "related_chapters"]
+        fields = ["id", "name", "serial_number", "file", "related_chapters"]
 
     def get_related_chapters(
             self,
