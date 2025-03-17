@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
+
 from datetime import timedelta
 from pathlib import Path
 
@@ -50,6 +52,7 @@ INSTALLED_APPS = [
     "user",
     "debug_toolbar",
     "django_q",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -183,3 +186,13 @@ Q_CLUSTER = {
         },
     },
 }
+
+
+# AWS
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+
+# File storage
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
+AWS_QUERYSTRING_AUTH = os.environ.get("AWS_QUERYSTRING_AUTH")
