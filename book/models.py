@@ -1,6 +1,13 @@
+import os
+import uuid
+
 from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils.text import slugify
+
+from storages.backends.s3boto3 import S3Boto3Storage
+from storages.backends.s3 import S3File
 
 
 def get_sentinel_user():
@@ -35,6 +42,17 @@ class Book(models.Model):
         return "Book: " + self.name
 
 
+def get_chapter_s3_path(instance: "Chapter", filename: str) -> os.path:
+    _, extension = os.path.splitext(filename)
+    filename = f"{slugify(instance.name)}-{uuid.uuid4()}{extension}"
+
+    return f"{instance.book.name}/{filename}"
+
+
+class ChapterS3Storage(S3Boto3Storage):
+    location = "books"
+
+
 class Chapter(models.Model):
     name = models.CharField(max_length=128)
     book = models.ForeignKey(
@@ -43,9 +61,20 @@ class Chapter(models.Model):
         related_name="chapters"
     )
     serial_number = models.PositiveIntegerField()
+    file = models.FileField(
+        max_length=256,
+        storage=ChapterS3Storage,
+        upload_to=get_chapter_s3_path,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return "Chapter: " + self.name
+
+    def open(self) -> S3File:
+        storage = S3Boto3Storage()
+        return storage.open(self.file.name, "rb")
 
 
 class Commentary(models.Model):
