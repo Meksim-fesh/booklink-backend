@@ -31,7 +31,9 @@ def get_picture_s3_path(instance: "Author", filename: str) -> str:
     _, extention = os.path.splitext(filename)
     filename = f"{uuid.uuid4()}{extention}"
 
-    return f"{instance.first_name} {instance.last_name}/{filename}"
+    author_name = slugify(f"{instance.first_name}{instance.last_name}")
+
+    return f"{author_name}/{filename}"
 
 
 class Author(models.Model):
@@ -55,7 +57,7 @@ def get_image_s3_path(instance: "Book", filename: str) -> str:
     _, extention = os.path.splitext(filename)
     filename = f"{slugify(instance.name)}-{uuid.uuid4()}{extention}"
 
-    return f"{instance.name}/image/{filename}"
+    return f"{slugify(instance.name)}/image/{filename}"
 
 
 class Book(models.Model):
@@ -78,7 +80,7 @@ def get_chapter_s3_path(instance: "Chapter", filename: str) -> str:
     _, extension = os.path.splitext(filename)
     filename = f"{slugify(instance.name)}-{uuid.uuid4()}{extension}"
 
-    return f"{instance.book.name}/chapters/{filename}"
+    return f"{slugify(instance.book.name)}/chapters/{filename}"
 
 
 class Chapter(models.Model):
