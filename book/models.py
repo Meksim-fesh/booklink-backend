@@ -23,7 +23,23 @@ class Genre(models.Model):
         return self.name
 
 
+class AuthorS3Storage(S3Boto3Storage):
+    location = "authors"
+
+
+def get_picture_s3_path(instance: "Author", filename: str) -> str:
+    _, extention = os.path.splitext(filename)
+    filename = f"{uuid.uuid4()}{extention}"
+
+    return f"{instance.first_name} {instance.last_name}/{filename}"
+
+
 class Author(models.Model):
+    picture = models.FileField(
+        max_length=256,
+        storage=AuthorS3Storage,
+        upload_to=get_picture_s3_path,
+    )
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
 
