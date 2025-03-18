@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 max_length=256,
                 null=True,
-                storage=book.models.ChapterS3Storage,
+                storage=book.models.BookRelatedS3Storage,
                 upload_to=book.models.get_chapter_s3_path,
             ),
         ),
