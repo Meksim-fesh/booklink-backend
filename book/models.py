@@ -31,7 +31,23 @@ class Author(models.Model):
         return self.first_name + " " + self.last_name
 
 
+class BookRelatedS3Storage(S3Boto3Storage):
+    location = "books"
+
+
+def get_image_s3_path(instance: "Book", filename: str) -> str:
+    _, extention = os.path.splitext(filename)
+    filename = f"{slugify(instance.name)}-{uuid.uuid4()}{extention}"
+
+    return f"{instance.name}/image/{filename}"
+
+
 class Book(models.Model):
+    image = models.FileField(
+        max_length=256,
+        storage=BookRelatedS3Storage,
+        upload_to=get_image_s3_path,
+    )
     name = models.CharField(max_length=255)
     genres = models.ManyToManyField(Genre, related_name="books")
     authors = models.ManyToManyField(Author, related_name="books")
@@ -42,15 +58,11 @@ class Book(models.Model):
         return "Book: " + self.name
 
 
-def get_chapter_s3_path(instance: "Chapter", filename: str) -> os.path:
+def get_chapter_s3_path(instance: "Chapter", filename: str) -> str:
     _, extension = os.path.splitext(filename)
     filename = f"{slugify(instance.name)}-{uuid.uuid4()}{extension}"
 
-    return f"{instance.book.name}/{filename}"
-
-
-class ChapterS3Storage(S3Boto3Storage):
-    location = "books"
+    return f"{instance.book.name}/chapters/{filename}"
 
 
 class Chapter(models.Model):
@@ -63,10 +75,8 @@ class Chapter(models.Model):
     serial_number = models.PositiveIntegerField()
     file = models.FileField(
         max_length=256,
-        storage=ChapterS3Storage,
+        storage=BookRelatedS3Storage,
         upload_to=get_chapter_s3_path,
-        null=True,
-        blank=True,
     )
 
     def __str__(self):
