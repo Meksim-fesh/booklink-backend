@@ -26,7 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG")
+DEBUG = (
+    os.environ.get("DEBUG", False) == "True"
+)
 
 ALLOWED_HOSTS = []
 
@@ -193,4 +195,7 @@ AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 # File storage
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
-AWS_QUERYSTRING_AUTH = os.environ.get("AWS_QUERYSTRING_AUTH")
+
+AWS_QUERYSTRING_AUTH = (
+    os.environ.get("AWS_QUERYSTRING_AUTH", False) == "True"
+)
