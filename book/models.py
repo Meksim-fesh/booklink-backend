@@ -48,6 +48,10 @@ class Author(models.Model):
     def __str__(self):
         return self.first_name + " " + self.last_name
 
+    def open(self) -> S3File:
+        storage = AuthorS3Storage()
+        return storage.open(self.picture.name, "rb")
+
 
 class BookRelatedS3Storage(S3Boto3Storage):
     location = "books"
@@ -75,6 +79,10 @@ class Book(models.Model):
     def __str__(self):
         return "Book: " + self.name
 
+    def open(self) -> S3File:
+        storage = BookRelatedS3Storage()
+        return storage.open(self.image.name, "rb")
+
 
 def get_chapter_s3_path(instance: "Chapter", filename: str) -> str:
     _, extension = os.path.splitext(filename)
@@ -101,7 +109,7 @@ class Chapter(models.Model):
         return "Chapter: " + self.name
 
     def open(self) -> S3File:
-        storage = S3Boto3Storage()
+        storage = BookRelatedS3Storage()
         return storage.open(self.file.name, "rb")
 
 
