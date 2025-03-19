@@ -24,6 +24,13 @@ class AuthorListSerializer(AuthorSerializer):
         fields = ["first_name", "last_name"]
 
 
+class AuthorDetailSerializer(AuthorSerializer):
+
+    class Meta:
+        model = models.Author
+        fields = ["id", "picture", "first_name", "last_name"]
+
+
 class ChapterSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -157,6 +164,7 @@ class BookSerializer(serializers.ModelSerializer):
         model = models.Book
         fields = [
             "id",
+            "image",
             "name",
             "genres",
             "authors",
@@ -188,11 +196,16 @@ class BookDetailSerializer(BookListSerializer):
     )
     views = serializers.IntegerField()
     likes = serializers.IntegerField()
+    authors = AuthorDetailSerializer(
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = models.Book
         fields = [
             "id",
+            "image",
             "name",
             "genres",
             "authors",
