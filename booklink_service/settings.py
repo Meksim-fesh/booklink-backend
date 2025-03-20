@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
+
 from datetime import timedelta
 from pathlib import Path
 
@@ -21,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    "django-insecure-&51d_6(p4nt3pbx*6cvvcb*m4@*((f6!p4civc8y&8-np$xzn)"
-)
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = (
+    os.environ.get("DEBUG", False) == "True"
+)
 
 ALLOWED_HOSTS = []
 
@@ -50,6 +52,7 @@ INSTALLED_APPS = [
     "user",
     "debug_toolbar",
     "django_q",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -183,3 +186,16 @@ Q_CLUSTER = {
         },
     },
 }
+
+
+# AWS
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+
+# File storage
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
+
+AWS_QUERYSTRING_AUTH = (
+    os.environ.get("AWS_QUERYSTRING_AUTH", False) == "True"
+)

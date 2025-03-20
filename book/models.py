@@ -1,6 +1,13 @@
+import os
+import uuid
+
 from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils.text import slugify
+
+from storages.backends.s3boto3 import S3Boto3Storage
+from storages.backends.s3 import S3File
 
 
 def get_sentinel_user():
@@ -16,15 +23,53 @@ class Genre(models.Model):
         return self.name
 
 
+class AuthorS3Storage(S3Boto3Storage):
+    location = "authors"
+
+
+def get_picture_s3_path(instance: "Author", filename: str) -> str:
+    _, extention = os.path.splitext(filename)
+    filename = f"{uuid.uuid4()}{extention}"
+
+    author_name = slugify(f"{instance.first_name}{instance.last_name}")
+
+    return f"{author_name}/{filename}"
+
+
 class Author(models.Model):
+    picture = models.FileField(
+        max_length=256,
+        storage=AuthorS3Storage,
+        upload_to=get_picture_s3_path,
+    )
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
 
     def __str__(self):
         return self.first_name + " " + self.last_name
 
+    def open(self) -> S3File:
+        storage = AuthorS3Storage()
+        return storage.open(self.picture.name, "rb")
+
+
+class BookRelatedS3Storage(S3Boto3Storage):
+    location = "books"
+
+
+def get_image_s3_path(instance: "Book", filename: str) -> str:
+    _, extention = os.path.splitext(filename)
+    filename = f"{slugify(instance.name)}-{uuid.uuid4()}{extention}"
+
+    return f"{slugify(instance.name)}/image/{filename}"
+
 
 class Book(models.Model):
+    image = models.FileField(
+        max_length=256,
+        storage=BookRelatedS3Storage,
+        upload_to=get_image_s3_path,
+    )
     name = models.CharField(max_length=255)
     genres = models.ManyToManyField(Genre, related_name="books")
     authors = models.ManyToManyField(Author, related_name="books")
@@ -33,6 +78,17 @@ class Book(models.Model):
 
     def __str__(self):
         return "Book: " + self.name
+
+    def open(self) -> S3File:
+        storage = BookRelatedS3Storage()
+        return storage.open(self.image.name, "rb")
+
+
+def get_chapter_s3_path(instance: "Chapter", filename: str) -> str:
+    _, extension = os.path.splitext(filename)
+    filename = f"{slugify(instance.name)}-{uuid.uuid4()}{extension}"
+
+    return f"{slugify(instance.book.name)}/chapters/{filename}"
 
 
 class Chapter(models.Model):
@@ -43,9 +99,18 @@ class Chapter(models.Model):
         related_name="chapters"
     )
     serial_number = models.PositiveIntegerField()
+    file = models.FileField(
+        max_length=256,
+        storage=BookRelatedS3Storage,
+        upload_to=get_chapter_s3_path,
+    )
 
     def __str__(self):
         return "Chapter: " + self.name
+
+    def open(self) -> S3File:
+        storage = BookRelatedS3Storage()
+        return storage.open(self.file.name, "rb")
 
 
 class Commentary(models.Model):
