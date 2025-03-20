@@ -110,7 +110,7 @@ class BookViewSet(
         url_name="popular-this-month",
     )
     def popular_this_month(self, request, *args, **kwargs):
-        """Returns a list of most viewed books in this month"""
+        """Returns a list of most viewed books in a current month"""
         return self.list(self, request, *args, **kwargs)
 
     @action(
@@ -197,6 +197,10 @@ class UserLibraryView(generics.ListAPIView):
 
         return queryset
 
+    def get(self, request, *args, **kwargs):
+        """Returns a list of books from user's library"""
+        return super().get(request, *args, **kwargs)
+
 
 class ChapterViewSet(
     mixins.RetrieveModelMixin,
@@ -205,12 +209,17 @@ class ChapterViewSet(
     queryset = models.Chapter.objects.select_related("book")
     serializer_class = serializers.ChapterDetailSerializer
 
+    def retrieve(self, request, *args, **kwargs):
+        """Returns a detail information about a single chapter"""
+        return super().retrieve(request, *args, **kwargs)
+
 
 class CommentaryCreateView(generics.GenericAPIView):
     serializer_class = serializers.CommentaryCreateSerializer
     queryset = models.Book.objects.all()
 
     def post(self, request, *args, **kwargs):
+        """Creates a new commentary to a book"""
         book = self.get_object()
         user = self.request.user
 
@@ -236,6 +245,11 @@ class ReplyCreateView(generics.GenericAPIView):
     queryset = models.Commentary.objects.all()
 
     def post(self, request, *args, **kwargs):
+        """
+        Creates a reply to a commentary.
+        Creation of a reply to an another reply
+        does not require additional spacing
+        """
         parent = self.get_object()
         user = self.request.user
 
