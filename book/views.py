@@ -9,6 +9,9 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.db.models.aggregates import Count
 
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
+
 from book import models, serializers
 
 
@@ -183,6 +186,32 @@ class BookViewSet(
 
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="genre_id",
+                description="Filters books with a specific genre id",
+                type=OpenApiTypes.INT,
+                required=False,
+            ),
+            OpenApiParameter(
+                name="author_id",
+                description="Filters books with a specific author id",
+                type=OpenApiTypes.INT,
+                required=False,
+            ),
+            OpenApiParameter(
+                name="order",
+                description="Sorts books in a specific way",
+                type=OpenApiTypes.STR,
+                required=False,
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """Returns a list of books"""
+        return super().list(request, *args, **kwargs)
 
 
 class UserLibraryView(generics.ListAPIView):
