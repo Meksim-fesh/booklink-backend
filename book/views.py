@@ -36,6 +36,28 @@ class BookViewSet(
     permission_classes = (IsAuthenticated, )
     authentication_classes = (JWTAuthentication, )
 
+    def _filter_by_genre_id(self, queryset):
+        genre_id = self.request.query_params.get("genre_id")
+
+        if genre_id:
+            queryset = queryset.filter(genres__id=genre_id)
+
+        return queryset
+
+    def _filter_by_author_id(self, queryset):
+        author_id = self.request.query_params.get("author_id")
+
+        if author_id:
+            queryset = queryset.filter(authors__id=author_id)
+
+        return queryset
+
+    def filter_by_query_params(self, queryset):
+        queryset = self._filter_by_genre_id(queryset)
+        queryset = self._filter_by_author_id(queryset)
+
+        return queryset
+
     def get_queryset(self):
         queryset = self.queryset
 
@@ -52,6 +74,8 @@ class BookViewSet(
             return queryset.annotate(
                 month_views=Count("viewed_by_this_month")
             ).order_by("-month_views")
+
+        queryset = self.filter_by_query_params(queryset)
 
         return queryset
 
