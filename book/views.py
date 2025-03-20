@@ -19,6 +19,10 @@ class GenreViewSet(
     queryset = models.Genre.objects.all()
     serializer_class = serializers.GenreSerializer
 
+    def list(self, request, *args, **kwargs):
+        """Return list of genres"""
+        return super().list(request, *args, **kwargs)
+
 
 class AuthorViewSet(
     mixins.ListModelMixin,
@@ -26,6 +30,10 @@ class AuthorViewSet(
 ):
     queryset = models.Author.objects.all()
     serializer_class = serializers.AuthorSerializer
+
+    def list(self, request, *args, **kwargs):
+        """Returns list of authors"""
+        return super().list(request, *args, **kwargs)
 
 
 class BookViewSet(
