@@ -52,9 +52,18 @@ class BookViewSet(
 
         return queryset
 
+    def _order_queryset(self, queryset):
+        order = self.request.query_params.get("order")
+
+        if order:
+            queryset = queryset.order_by(order)
+
+        return queryset
+
     def filter_by_query_params(self, queryset):
         queryset = self._filter_by_genre_id(queryset)
         queryset = self._filter_by_author_id(queryset)
+        queryset = self._order_queryset(queryset)
 
         return queryset
 
