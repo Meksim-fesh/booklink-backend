@@ -110,6 +110,7 @@ class BookViewSet(
         url_name="popular-this-month",
     )
     def popular_this_month(self, request, *args, **kwargs):
+        """Returns a list of most viewed books in this month"""
         return self.list(self, request, *args, **kwargs)
 
     @action(
@@ -119,6 +120,11 @@ class BookViewSet(
         url_name="toggle-library",
     )
     def toggle_library(self, request, pk=None):
+        """
+        Add a book to user's library.
+        Second request for the same book
+        removes the book from the user's library
+        """
         book = self.get_object()
         user = self.request.user
 
@@ -138,6 +144,11 @@ class BookViewSet(
             url_name="toggle-like",
     )
     def toggle_like(self, request, pk=None):
+        """
+        Add a like to a book.
+        Second request for the same book
+        removes the like
+        """
         book = self.get_object()
         user = self.request.user
 
@@ -154,6 +165,10 @@ class BookViewSet(
         return Response({"status": "Like was removed"})
 
     def retrieve(self, request, *args, **kwargs):
+        """
+        Returns a detailed information about a single book.
+        Loads summary, chapters and commentaries
+        """
         instance = self.get_object()
         user = self.request.user
 
