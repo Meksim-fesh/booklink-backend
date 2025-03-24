@@ -28,14 +28,14 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         """
-        Updated a detail information about authenticated user
-        (all the fields should be filled)
+        Updates authenticated user's detail information
+        (requires all the fields to be provided)
         """
         return super().put(request, *args, **kwargs)
 
     def patch(self, request, *args, **kwargs):
         """
-        Updated a detail information about authenticated user
-        (not all the fields should be filled)
+        Updates authenticated user's detail information
+        (does not require all the fields to be provided)
         """
         return super().patch(request, *args, **kwargs)
