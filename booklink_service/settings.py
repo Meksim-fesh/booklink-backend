@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "django_q",
     "storages",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -149,7 +150,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 
@@ -196,6 +198,12 @@ AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
 
-AWS_QUERYSTRING_AUTH = (
-    os.environ.get("AWS_QUERYSTRING_AUTH", False) == "True"
-)
+AWS_QUERYSTRING_AUTH = os.environ.get("AWS_QUERYSTRING_AUTH", False) == "True"
+
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "BookLink API",
+    "DESCRIPTION": "Simple servise for reading books",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}

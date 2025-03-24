@@ -9,6 +9,9 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.db.models.aggregates import Count
 
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
+
 from book import models, serializers
 
 
@@ -19,6 +22,10 @@ class GenreViewSet(
     queryset = models.Genre.objects.all()
     serializer_class = serializers.GenreSerializer
 
+    def list(self, request, *args, **kwargs):
+        """Return list of genres"""
+        return super().list(request, *args, **kwargs)
+
 
 class AuthorViewSet(
     mixins.ListModelMixin,
@@ -26,6 +33,10 @@ class AuthorViewSet(
 ):
     queryset = models.Author.objects.all()
     serializer_class = serializers.AuthorSerializer
+
+    def list(self, request, *args, **kwargs):
+        """Returns list of authors"""
+        return super().list(request, *args, **kwargs)
 
 
 class BookViewSet(
@@ -102,6 +113,7 @@ class BookViewSet(
         url_name="popular-this-month",
     )
     def popular_this_month(self, request, *args, **kwargs):
+        """Returns a list of most viewed books in a current month"""
         return self.list(self, request, *args, **kwargs)
 
     @action(
@@ -111,6 +123,11 @@ class BookViewSet(
         url_name="toggle-library",
     )
     def toggle_library(self, request, pk=None):
+        """
+        Add a book to user's library.
+        Second request for the same book
+        removes the book from the user's library
+        """
         book = self.get_object()
         user = self.request.user
 
@@ -130,6 +147,11 @@ class BookViewSet(
             url_name="toggle-like",
     )
     def toggle_like(self, request, pk=None):
+        """
+        Add a like to a book.
+        Second request for the same book
+        removes the like
+        """
         book = self.get_object()
         user = self.request.user
 
@@ -146,6 +168,10 @@ class BookViewSet(
         return Response({"status": "Like was removed"})
 
     def retrieve(self, request, *args, **kwargs):
+        """
+        Returns a detailed information about a single book.
+        Loads summary, chapters and commentaries
+        """
         instance = self.get_object()
         user = self.request.user
 
@@ -161,6 +187,32 @@ class BookViewSet(
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="genre_id",
+                description="Filters books with a specific genre id",
+                type=OpenApiTypes.INT,
+                required=False,
+            ),
+            OpenApiParameter(
+                name="author_id",
+                description="Filters books with a specific author id",
+                type=OpenApiTypes.INT,
+                required=False,
+            ),
+            OpenApiParameter(
+                name="order",
+                description="Sorts books in a specific way",
+                type=OpenApiTypes.STR,
+                required=False,
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """Returns a list of books"""
+        return super().list(request, *args, **kwargs)
+
 
 class UserLibraryView(generics.ListAPIView):
     serializer_class = serializers.BookListSerializer
@@ -174,6 +226,10 @@ class UserLibraryView(generics.ListAPIView):
 
         return queryset
 
+    def get(self, request, *args, **kwargs):
+        """Returns a list of books from user's library"""
+        return super().get(request, *args, **kwargs)
+
 
 class ChapterViewSet(
     mixins.RetrieveModelMixin,
@@ -182,12 +238,17 @@ class ChapterViewSet(
     queryset = models.Chapter.objects.select_related("book")
     serializer_class = serializers.ChapterDetailSerializer
 
+    def retrieve(self, request, *args, **kwargs):
+        """Returns a detail information about a single chapter"""
+        return super().retrieve(request, *args, **kwargs)
+
 
 class CommentaryCreateView(generics.GenericAPIView):
     serializer_class = serializers.CommentaryCreateSerializer
     queryset = models.Book.objects.all()
 
     def post(self, request, *args, **kwargs):
+        """Creates a new commentary to a book"""
         book = self.get_object()
         user = self.request.user
 
@@ -213,6 +274,11 @@ class ReplyCreateView(generics.GenericAPIView):
     queryset = models.Commentary.objects.all()
 
     def post(self, request, *args, **kwargs):
+        """
+        Creates a reply to a commentary.
+        Creation of a reply to an another reply
+        does not require additional spacing
+        """
         parent = self.get_object()
         user = self.request.user
 
